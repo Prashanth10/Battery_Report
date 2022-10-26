@@ -18,6 +18,9 @@ using Windows.System.Power;
 using System.Threading;
 using System.Data;
 using Microsoft.UI.Xaml.Shapes;
+using Windows.Devices.Power;
+using System.Timers;
+using Microsoft.UI.Dispatching;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -35,7 +38,7 @@ namespace Battery
             this.InitializeComponent();
         }
 
-        public static int i = 0;
+        public static int i = 0, lastHour;
         public static bool run = true;
 
         public void RunApplicationAsync(bool start)
@@ -45,7 +48,24 @@ namespace Battery
             string time = DateTime.Now.ToString("HH:mm:ss");
             Insert(remainingCharge, time, batteryStatus);
 
-            run = start;
+            if (start)
+            {
+                PowerManager.BatteryStatusChanged += PowerManager_BatteryStatusChanged;
+                PowerManager.RemainingChargePercentChanged += PowerManager_ChargePercentChanged;
+                System.Timers.Timer aTimer = new System.Timers.Timer(1000);
+                lastHour = DateTime.Now.Hour;
+                aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            }
+            else
+            {
+                PowerManager.BatteryStatusChanged -= PowerManager_BatteryStatusChanged;
+                PowerManager.RemainingChargePercentChanged -= PowerManager_ChargePercentChanged;
+                System.Timers.Timer aTimer = new System.Timers.Timer(1000);
+                lastHour = DateTime.Now.Hour;
+                aTimer.Elapsed -= new ElapsedEventHandler(OnTimedEvent);
+            }
+
+            /*run = start;
 
             bool charge = batteryStatus.Equals("Charging");
 
@@ -82,21 +102,72 @@ namespace Battery
                     Thread.Sleep(1000);
                 }
 
-            }
-            /*PowerManager.BatteryStatusChanged += PowerManager_BatteryStatusChanged;*/
+            }*/
+
             return;
         }
 
-        /*private void PowerManager_BatteryStatusChanged(object sender, object e)
+        private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
+            DateTime time_now = DateTime.Now;
+            if (lastHour < time_now.Hour || (lastHour == 23 && time_now.Hour == 0))
+            {
+                lastHour = time_now.Hour;
+
+                String batteryStatus = PowerManager.BatteryStatus.ToString();
+                int remainingCharge = PowerManager.RemainingChargePercent;
+                string time = time_now.ToString("HH:mm:ss");
+                Insert(remainingCharge, time, batteryStatus);
+
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    Debug.Text = time;
+                });
+            }
             DispatcherQueue.TryEnqueue(() =>
+            {
+                Debug.Text = lastHour + " " + time_now.ToString("HH:mm:ss");
+            });
+        }
+
+        private void PowerManager_ChargePercentChanged(object sender, object e)
+        {
+            String batteryStatus = PowerManager.BatteryStatus.ToString();
+            int remainingCharge = PowerManager.RemainingChargePercent;
+            string time = DateTime.Now.ToString("HH:mm:ss");
+            if (remainingCharge == 100)
+                Insert(remainingCharge, time, batteryStatus);
+
+            /*DispatcherQueue.TryEnqueue(() =>
             {
                 String batteryStatus = PowerManager.BatteryStatus.ToString();
                 int remainingCharge = PowerManager.RemainingChargePercent;
                 string time = DateTime.Now.ToString("HH:mm:ss");
-                Insert(remainingCharge, time, batteryStatus);
+                if(remainingCharge==100)
+                    Debug.Text = batteryStatus + " " + remainingCharge + " " + time;
+            });*/
+        }
+
+        private void PowerManager_BatteryStatusChanged(object sender, object e)
+        {
+            String batteryStatus = PowerManager.BatteryStatus.ToString();
+            int remainingCharge = PowerManager.RemainingChargePercent;
+            string time = DateTime.Now.ToString("HH:mm:ss");
+
+            if(batteryStatus.Equals("Idle"))
+                batteryStatus = "Charging";
+
+            Insert(remainingCharge, time, batteryStatus);
+
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                /*String batteryStatus = PowerManager.BatteryStatus.ToString();
+                int remainingCharge = PowerManager.RemainingChargePercent;
+                string time = DateTime.Now.ToString("HH:mm:ss");
+                if (!batteryStatus.Equals("Idle"))
+                    Debug.Text = batteryStatus + " " + remainingCharge + " " + time;*/
             });
-        }*/
+        }
 
         public void Insert(int remainingCharge, String time, String batteryStatus)
         {
@@ -217,19 +288,19 @@ namespace Battery
         private async void StartButton_Click(object sender, RoutedEventArgs e)
         {
             startButton.Content = "Started";
-            /*await Task.Run(() => RunApplicationAsync(true));*/
+            await Task.Run(() => RunApplicationAsync(true));
         }
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
             /*RunApplicationAsync(false);*/
             stopButton.Content = "Stopped";
-            Report result = GetReport();
+            /*Report result = GetReport();
 
             
             this.result.Text = result.HourlyReport;
             this.Debug.Text = result.CentReport;
             this.result.Visibility = Visibility.Visible;
-            this.Debug.Visibility = Visibility.Visible;
+            this.Debug.Visibility = Visibility.Visible;*/
         }
     }
 

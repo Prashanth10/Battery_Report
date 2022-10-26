@@ -29,7 +29,7 @@
             <TextBlock Name="result" TextWrapping="Wrap" Visibility="Collapsed">Results</TextBlock>
         </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="1" Margin="2,2,2,2">
-            <TextBlock Name="Debug" TextWrapping="Wrap" Visibility="Collapsed">Debug</TextBlock>
+            <TextBlock Name="Debug" TextWrapping="Wrap">Debug</TextBlock>
         </StackPanel>
     </Grid>
 
