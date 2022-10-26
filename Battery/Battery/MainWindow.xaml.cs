@@ -50,7 +50,7 @@ namespace Battery
             bool charge = batteryStatus.Equals("Charging");
 
             bool cent = remainingCharge==100;
-            
+
             while (run)
             {
                 remainingCharge = PowerManager.RemainingChargePercent;
@@ -82,17 +82,22 @@ namespace Battery
                     Thread.Sleep(1000);
                 }
 
-                /*PowerManager.BatteryStatusChanged += (s,args) =>
-                {
-                    DispatcherQueue.TryEnqueue(() =>
-                    {
-                        this.Debug.Text = pwr.ToString();
-                        i += 1;
-                    });
-                };*/
             }
+            /*PowerManager.BatteryStatusChanged += PowerManager_BatteryStatusChanged;*/
             return;
         }
+
+        /*private void PowerManager_BatteryStatusChanged(object sender, object e)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                String batteryStatus = PowerManager.BatteryStatus.ToString();
+                int remainingCharge = PowerManager.RemainingChargePercent;
+                string time = DateTime.Now.ToString("HH:mm:ss");
+                Insert(remainingCharge, time, batteryStatus);
+            });
+        }*/
+
         public void Insert(int remainingCharge, String time, String batteryStatus)
         {
             string connection = @"Server=INL393\SQLEXPRESS; database=battery; trusted_connection=yes";
@@ -103,19 +108,15 @@ namespace Battery
             comm.CommandText = "insert into charge values(" + remainingCharge +",'" + time + "','" + batteryStatus + "')";
             SqlDataReader dr = comm.ExecuteReader();
             conn.Close();
-
-            /*Console.WriteLine("Battery Percent: " + remainingCharge);
-            Console.WriteLine(time);
-            Console.WriteLine("battery charge status : " + strBatteryChargingStatus);*/
         }
-        /*public class Event
+        public class Event
         {
             public EventHandler ChangeEvent;
             public void OnChange()
             {
                 ChangeEvent.Invoke(this, EventArgs.Empty);
             }
-        }*/
+        }
 
         public Report GetReport()
         {
@@ -166,7 +167,6 @@ namespace Battery
                 else if (percent == 100 && (chargeStatus.Equals("Discharging") || (chargeStatus.Equals("Charging") && (i == list.Count - 1))))
                 {
                     TimeSpan ts = (time - DateTime.Parse(centStart));
-                    /*Console.WriteLine(time.ToString() + "   " + centStart + "   " + ts.ToString());*/
                     if (ts.Hours > 0 || ts.Minutes >= 30)
                         badCount += 1;
                     else
@@ -202,10 +202,6 @@ namespace Battery
                 previousTime = time;
                 previousChargeStatus = chargeStatus;
 
-                /*Console.WriteLine(percent);
-                Console.WriteLine(time);
-                Console.WriteLine(chargeStatus);
-                Console.WriteLine();*/
             }
             conn.Close();
 
@@ -221,24 +217,19 @@ namespace Battery
         private async void StartButton_Click(object sender, RoutedEventArgs e)
         {
             startButton.Content = "Started";
-            await Task.Run(() => RunApplicationAsync(true));
-
-            /*String batteryStatus = PowerManager.BatteryStatus.ToString();
-            bool chargeStatus = batteryStatus.Equals("Charging");
-            String powerStatus = PowerManager.PowerSupplyStatus.ToString();
-            int remainingCharge = PowerManager.RemainingChargePercent;
-            this.Debug.Text = batteryStatus + "  " + chargeStatus + "  " + powerStatus + "  " + remainingCharge;*/
-
+            /*await Task.Run(() => RunApplicationAsync(true));*/
         }
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
-            RunApplicationAsync(false);
+            /*RunApplicationAsync(false);*/
             stopButton.Content = "Stopped";
             Report result = GetReport();
 
-
+            
             this.result.Text = result.HourlyReport;
             this.Debug.Text = result.CentReport;
+            this.result.Visibility = Visibility.Visible;
+            this.Debug.Visibility = Visibility.Visible;
         }
     }
 

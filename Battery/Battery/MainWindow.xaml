@@ -8,17 +8,28 @@
     mc:Ignorable="d">
 
     <Grid>
-        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Button x:Name="startButton" Grid.Row="0" Grid.Column="0" Click="StartButton_Click">Start</Button>
-            <Button x:Name="stopButton" Grid.Row="0" Grid.Column="0" Click="StopButton_Click">Stop</Button>
-            
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="250,3,3,3" Padding="5,5,5,5" Orientation="Horizontal">
+            <Button x:Name="startButton" Click="StartButton_Click">Start</Button>
+            <Button x:Name="stopButton" Click="StopButton_Click">Stop</Button>
         </StackPanel>
 
-        <StackPanel Grid.Row="1"  Margin="1,1,1,1" Orientation="Horizontal" HorizontalAlignment="Center">
-            <TextBlock Name="result" TextWrapping="Wrap">Results</TextBlock>
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="2,2,2,2">
+            <TextBlock Name="result" TextWrapping="Wrap" Visibility="Collapsed">Results</TextBlock>
         </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="1" Margin="1,1,1,1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-            <TextBlock Name="Debug" TextWrapping="Wrap">Debug</TextBlock>
+        <StackPanel Grid.Row="2" Grid.Column="1" Margin="2,2,2,2">
+            <TextBlock Name="Debug" TextWrapping="Wrap" Visibility="Collapsed">Debug</TextBlock>
         </StackPanel>
     </Grid>
 
