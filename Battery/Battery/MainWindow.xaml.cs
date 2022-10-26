@@ -53,6 +53,7 @@ namespace Battery
                 PowerManager.BatteryStatusChanged += PowerManager_BatteryStatusChanged;
                 PowerManager.RemainingChargePercentChanged += PowerManager_ChargePercentChanged;
                 System.Timers.Timer aTimer = new System.Timers.Timer(1000);
+                aTimer.Start();
                 lastHour = DateTime.Now.Hour;
                 aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             }
@@ -119,15 +120,11 @@ namespace Battery
                 string time = time_now.ToString("HH:mm:ss");
                 Insert(remainingCharge, time, batteryStatus);
 
-                DispatcherQueue.TryEnqueue(() =>
+                /*DispatcherQueue.TryEnqueue(() =>
                 {
                     Debug.Text = time;
-                });
+                });*/
             }
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                Debug.Text = lastHour + " " + time_now.ToString("HH:mm:ss");
-            });
         }
 
         private void PowerManager_ChargePercentChanged(object sender, object e)
@@ -154,19 +151,17 @@ namespace Battery
             int remainingCharge = PowerManager.RemainingChargePercent;
             string time = DateTime.Now.ToString("HH:mm:ss");
 
-            if(batteryStatus.Equals("Idle"))
-                batteryStatus = "Charging";
+            if(!batteryStatus.Equals("Idle"))
+                Insert(remainingCharge, time, batteryStatus);
 
-            Insert(remainingCharge, time, batteryStatus);
-
-            DispatcherQueue.TryEnqueue(() =>
+            /*DispatcherQueue.TryEnqueue(() =>
             {
-                /*String batteryStatus = PowerManager.BatteryStatus.ToString();
+                String batteryStatus = PowerManager.BatteryStatus.ToString();
                 int remainingCharge = PowerManager.RemainingChargePercent;
                 string time = DateTime.Now.ToString("HH:mm:ss");
                 if (!batteryStatus.Equals("Idle"))
-                    Debug.Text = batteryStatus + " " + remainingCharge + " " + time;*/
-            });
+                    Debug.Text = batteryStatus + " " + remainingCharge + " " + time;
+            });*/
         }
 
         public void Insert(int remainingCharge, String time, String batteryStatus)
@@ -179,14 +174,6 @@ namespace Battery
             comm.CommandText = "insert into charge values(" + remainingCharge +",'" + time + "','" + batteryStatus + "')";
             SqlDataReader dr = comm.ExecuteReader();
             conn.Close();
-        }
-        public class Event
-        {
-            public EventHandler ChangeEvent;
-            public void OnChange()
-            {
-                ChangeEvent.Invoke(this, EventArgs.Empty);
-            }
         }
 
         public Report GetReport()
@@ -292,15 +279,15 @@ namespace Battery
         }
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
-            /*RunApplicationAsync(false);*/
+            RunApplicationAsync(false);
             stopButton.Content = "Stopped";
-            /*Report result = GetReport();
+            Report result = GetReport();
 
-            
+
             this.result.Text = result.HourlyReport;
             this.Debug.Text = result.CentReport;
             this.result.Visibility = Visibility.Visible;
-            this.Debug.Visibility = Visibility.Visible;*/
+            this.Debug.Visibility = Visibility.Visible;
         }
     }
 
